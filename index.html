@@ -1,0 +1,64 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title></title>
+<script language="javascript" type="text/javascript">
+    var wsUri = "ws://localhost:1234/ws";
+    var ctx;
+    
+    function wsConnect() {
+        var canvas = document.getElementById("canvas");
+        ctx = canvas.getContext('2d');
+
+        ws = new WebSocket(wsUri);
+        ws.onopen = function (e) {
+            console.log("CONNECTED");
+            ws.send("READY");
+        };
+        ws.onclose = function (e) {
+            console.log("DISCONNECTED");
+        };
+
+        ws.onmessage = function (e) {
+
+            var data = e.data.split("\n");
+            console.log("ws.onmessage");
+            console.log(data);
+
+            for (var line in data) {
+                var msg = data[line].split(" ");
+                var cmd = msg[0];
+            }
+
+            if (cmd == "DRAW") {
+                console.log("cmd DRAW");
+                var imgData = msg[1];
+                var img = new Image();
+                img.src = "data:image/png;base64," + imgData;
+                img.width = 640;
+                img.height = 480;
+
+                ctx.drawImage(img, 0, 0, 640, 480);
+            } else {
+                console.log("Unknown command: " + cmd);
+            }
+        }
+
+        ws.onerror = function (e) {
+            console.log('WS Error: ' + e.data);
+        };
+    };
+
+    window.addEventListener("load", wsConnect, false);
+
+</script>
+
+<body>
+    <h2>opencv output</h2>
+
+    <canvas id="canvas" width="640" height="480">
+        Sorry, your browser does not support Canvas
+    </canvas>
+
+</body>
+
+</html>
